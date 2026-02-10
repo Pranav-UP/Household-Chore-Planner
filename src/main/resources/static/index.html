@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chore Planner</title>
+  <link rel="stylesheet" href="/style.css">
+  <script>
+    const role = localStorage.getItem("role");
+    if (!role) {
+      window.location.href = "login.html";
+    }
+  </script>
+</head>
+<body>
+
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1 class="title">Chore Planner</h1>
+          <p class="subtitle">Owner view for quick chore creation.</p>
+        </div>
+      </div>
+      <span class="pill">Overview</span>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Add new chore</h2>
+        <p class="subtitle">Create a chore and track its progress.</p>
+        <div class="stack">
+          <div class="field">
+            <label for="title">Chore title</label>
+            <input id="title" placeholder="Chore title">
+          </div>
+          <div class="field">
+            <label for="description">Description</label>
+            <input id="description" placeholder="Details and expectations">
+          </div>
+          <div class="field">
+            <label for="dueDate">Due date</label>
+            <input id="dueDate" type="date">
+          </div>
+          <button class="btn btn-primary" onclick="addChore()">Add chore</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Chore list</h2>
+        <p class="subtitle">Track status across the house.</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="choreTable"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

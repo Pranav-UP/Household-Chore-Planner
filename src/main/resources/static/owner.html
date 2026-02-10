@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Owner Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1 class="title">Owner Dashboard</h1>
+          <p class="subtitle">Assign chores and keep momentum visible.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span class="pill">Owner</span>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <section class="stat-grid" style="margin-bottom: 20px;">
+      <div class="stat">
+        <div class="value">12</div>
+        <div class="subtitle">Open chores</div>
+      </div>
+      <div class="stat">
+        <div class="value">5</div>
+        <div class="subtitle">Due today</div>
+      </div>
+      <div class="stat">
+        <div class="value">3</div>
+        <div class="subtitle">New queries</div>
+      </div>
+    </section>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Add and assign chore</h2>
+        <p class="subtitle">Be specific so workers can finish fast.</p>
+        <div class="stack">
+          <div class="field">
+            <label for="title">Chore title</label>
+            <input type="text" id="title" placeholder="Example: Wash dishes">
+          </div>
+          <div class="field">
+            <label for="description">Description</label>
+            <input type="text" id="description" placeholder="Details and notes">
+          </div>
+          <div class="field">
+            <label for="dueDate">Due date</label>
+            <input type="date" id="dueDate">
+          </div>
+          <div class="field">
+            <label for="workerId">Assign to</label>
+            <select id="workerId">
+              <option value="">Select worker</option>
+              <option value="2">worker1</option>
+              <option value="3">worker2</option>
+              <option value="4">worker3</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addChore()">Add chore</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>All chores</h2>
+        <p class="subtitle">Everything assigned across the house.</p>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Worker</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="choreTable"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <section class="card" style="margin-top: 20px;">
+      <h2>Worker queries</h2>
+      <p class="subtitle">Respond quickly to keep chores moving.</p>
+      <div id="queryList" class="chat"></div>
+    </section>
+  </div>
+
+  <button class="chat-fab" onclick="toggleChat()" aria-label="Open chat">Open chat</button>
+  <div id="chatPopover" class="chat-popover" role="dialog" aria-label="Worker queries">
+    <div class="chat-header">
+      <strong>Worker queries</strong>
+      <button class="btn btn-secondary" onclick="toggleChat()">Close</button>
+    </div>
+    <div class="chat-body" id="queryListPopover"></div>
+  </div>
+
+  <script>
+    function logout() {
+      localStorage.clear();
+      window.location.href = "/login.html";
+    }
+    function toggleChat() {
+      const popover = document.getElementById("chatPopover");
+      if (popover) popover.classList.toggle("open");
+    }
+  </script>
+  <script src="/js/owner.js"></script>
+
+</body>
+</html>

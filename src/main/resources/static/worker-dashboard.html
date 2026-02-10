@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Dashboard - Chore Planner</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body {
+      background: #f4f1ec;
+      font-family: "Sora", sans-serif;
+    }
+    .navbar-custom {
+      background: linear-gradient(135deg, #b45309 0%, #a84e0a 100%);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    .navbar-brand {
+      font-weight: 700;
+      font-size: 20px;
+      color: white !important;
+    }
+    .btn-logout {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+    }
+    .btn-logout:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+    }
+    .dashboard-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+    .welcome-section {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .welcome-section h1 {
+      color: #b45309;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .card-custom {
+      background: white;
+      border: 1px solid #e5dfd6;
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    .card-custom h3 {
+      color: #b45309;
+      margin-bottom: 20px;
+      font-weight: 600;
+      font-size: 20px;
+      border-bottom: 2px solid #b45309;
+      padding-bottom: 12px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #fef9f3, #f9ede4);
+      border: 1px solid #f5ddc7;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+    .stat-card h4 {
+      color: #b45309;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+    .stat-card p {
+      color: #6b6b6b;
+      margin: 0;
+      font-size: 13px;
+    }
+    .chore-card {
+      background: linear-gradient(135deg, #ffffff, #fffbf5);
+      border: 1px solid #e5dfd6;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s;
+    }
+    .chore-card:hover {
+      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.1);
+      transform: translateY(-2px);
+    }
+    .chore-card h5 {
+      color: #b45309;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+    .chore-card p {
+      margin: 6px 0;
+      color: #6b6b6b;
+      font-size: 14px;
+    }
+    .chore-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+    }
+    .badge-pending {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-completed {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .btn-complete {
+      background: #b45309;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .btn-complete:hover {
+      background: #92400e;
+      transform: translateY(-2px);
+      color: white;
+    }
+    .btn-complete:disabled {
+      background: #c1c1c1;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .btn-group-filter {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-filter {
+      padding: 8px 16px;
+      border: 2px solid #b45309;
+      background: white;
+      color: #b45309;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .btn-filter.active {
+      background: #b45309;
+      color: white;
+    }
+    .alert {
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6b6b6b;
+    }
+    .empty-state p {
+      margin-top: 10px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-custom">
+    <div class="container-fluid">
+      <div class="navbar-brand">
+        <span style="margin-right: 10px;">✅</span> Chore Planner - Member
+      </div>
+      <div>
+        <span style="color: white; margin-right: 20px;">Welcome, <strong id="username"></strong></span>
+        <button class="btn-logout" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+      <h1>Your Tasks</h1>
+      <p style="margin: 0; color: #6b6b6b;">Complete your assigned chores and keep the household running smoothly</p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h4 id="totalAssigned">0</h4>
+        <p>Total Assigned</p>
+      </div>
+      <div class="stat-card">
+        <h4 id="pendingCount">0</h4>
+        <p>Pending Chores</p>
+      </div>
+      <div class="stat-card">
+        <h4 id="completedCount">0</h4>
+        <p>Completed Chores</p>
+      </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="alertMessage"></div>
+
+    <!-- Filter Buttons -->
+    <div class="btn-group-filter">
+      <button class="btn-filter active" onclick="filterChores('ALL')">All</button>
+      <button class="btn-filter" onclick="filterChores('PENDING')">Pending</button>
+      <button class="btn-filter" onclick="filterChores('COMPLETED')">Completed</button>
+    </div>
+
+    <!-- Chores Card -->
+    <div class="card-custom">
+      <h3>📋 Your Assigned Chores</h3>
+      <div id="choresList"></div>
+    </div>
+  </div>
+
+  <script src="/js/worker-dashboard.js"></script>
+</body>
+</html>

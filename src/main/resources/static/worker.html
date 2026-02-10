@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Worker Dashboard</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="page">
+    <header class="header">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <h1 class="title">Worker Dashboard</h1>
+          <p class="subtitle">Stay focused on the next task.</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span class="pill">Worker</span>
+        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <section class="stat-grid" style="margin-bottom: 20px;">
+      <div class="stat">
+        <div class="value">4</div>
+        <div class="subtitle">Assigned to you</div>
+      </div>
+      <div class="stat">
+        <div class="value">2</div>
+        <div class="subtitle">Due today</div>
+      </div>
+      <div class="stat">
+        <div class="value">1</div>
+        <div class="subtitle">Awaiting reply</div>
+      </div>
+    </section>
+
+    <main class="grid">
+      <section class="card">
+        <h2>My chores</h2>
+        <p class="subtitle">Complete and keep the queue clear.</p>
+        <table class="table" id="taskTable"></table>
+      </section>
+
+      <section class="card">
+        <h2>Query owner</h2>
+        <p class="subtitle">Send a quick note if something is blocked.</p>
+        <div class="field">
+          <label for="queryMessage">Message</label>
+          <textarea id="queryMessage" placeholder="Describe your issue or question"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="sendQuery()">Send query</button>
+        <div id="queryList" class="chat" style="margin-top: 16px;"></div>
+      </section>
+    </main>
+  </div>
+
+  <button class="chat-fab" onclick="toggleChat()" aria-label="Open chat">Open chat</button>
+  <div id="chatPopover" class="chat-popover" role="dialog" aria-label="Owner replies">
+    <div class="chat-header">
+      <strong>Owner replies</strong>
+      <button class="btn btn-secondary" onclick="toggleChat()">Close</button>
+    </div>
+    <div class="chat-body" id="queryListPopover"></div>
+    <div class="chat-input">
+      <div class="field">
+        <label for="queryMessagePopover">Message</label>
+        <textarea id="queryMessagePopover" placeholder="Describe your issue or question"></textarea>
+      </div>
+      <button class="btn btn-primary" onclick="sendQueryFromPopover()">Send query</button>
+    </div>
+  </div>
+
+  <script src="/js/worker.js"></script>
+</body>
+</html>
