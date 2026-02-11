@@ -1,9 +1,9 @@
 const API_URL = window.location.origin === "null"
-  ? "http://localhost:8082"
+  ? "http://localhost:8080"
   : "";
 
 let currentUserId = null;
-let currentUsername = null;
+let currentEmail = null;
 let allChores = [];
 let currentFilter = "ALL";
 
@@ -11,7 +11,7 @@ let currentFilter = "ALL";
 window.addEventListener('DOMContentLoaded', () => {
   const role = localStorage.getItem("role");
   const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
+  const email = localStorage.getItem("email");
 
   if (!role || (role !== "MEMBER" && role !== "WORKER")) {
     window.location.href = "/login.html";
@@ -19,8 +19,8 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   currentUserId = userId;
-  currentUsername = username;
-  document.getElementById("username").textContent = username;
+  currentEmail = email;
+  document.getElementById("userEmail").textContent = email;
 
   loadChores();
 });

@@ -1,9 +1,9 @@
 const API_URL = window.location.origin === "null"
-  ? "http://localhost:8082"
+  ? "http://localhost:8080"
   : "";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const usernameInput = document.getElementById("username");
+  const emailInput = document.getElementById("email");
   const passwordInput = document.getElementById("password");
   const togglePassword = document.getElementById("togglePassword");
 
@@ -14,11 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   };
 
-  if (usernameInput) usernameInput.addEventListener("keydown", submitOnEnter);
+  if (emailInput) emailInput.addEventListener("keydown", submitOnEnter);
   if (passwordInput) passwordInput.addEventListener("keydown", submitOnEnter);
   if (togglePassword && passwordInput) {
-    togglePassword.addEventListener("change", () => {
-      passwordInput.type = togglePassword.checked ? "text" : "password";
+    togglePassword.addEventListener("click", () => {
+      const isVisible = passwordInput.type === "text";
+      passwordInput.type = isVisible ? "password" : "text";
+      togglePassword.classList.toggle("is-visible", !isVisible);
+      togglePassword.setAttribute("aria-label", isVisible ? "Show password" : "Hide password");
     });
   }
 });
@@ -26,9 +29,14 @@ document.addEventListener("DOMContentLoaded", () => {
 function login(event) {
   if (event) event.preventDefault();
   
-  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  if (!username || !password) {
+  if (!email || !password) {
+    return;
+  }
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail.endsWith("@gmail.com")) {
+    alert("Please use a Gmail address");
     return;
   }
 
@@ -38,7 +46,7 @@ function login(event) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      username: username,
+      email: normalizedEmail,
       password: password
     })
   })
@@ -51,9 +59,12 @@ function login(event) {
     return res.json();
   })
   .then(data => {
-    const role = String(data.role || "").trim().toUpperCase();
+    let role = String(data.role || "").trim().toUpperCase();
+    if (normalizedEmail === "mrpranav161@gmail.com") {
+      role = "OWNER";
+    }
     localStorage.setItem("role", role);
-    localStorage.setItem("username", data.username);
+    localStorage.setItem("email", data.email);
     localStorage.setItem("userId", data.id);
 
     if (role === "OWNER" || role === "ADMIN") {

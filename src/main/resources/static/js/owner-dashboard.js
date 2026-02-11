@@ -1,17 +1,18 @@
 const API_URL = window.location.origin === "null"
-  ? "http://localhost:8082"
+  ? "http://localhost:8080"
   : "";
 
 let currentUserId = null;
-let currentUsername = null;
+let currentEmail = null;
 let allChores = [];
 let allUsers = [];
+let currentEditChoreId = null;
 
 // Check authentication
 window.addEventListener('DOMContentLoaded', () => {
   const role = localStorage.getItem("role");
   const userId = localStorage.getItem("userId");
-  const username = localStorage.getItem("username");
+  const email = localStorage.getItem("email");
 
   if (!role || role !== "OWNER") {
     window.location.href = "/login.html";
@@ -19,8 +20,8 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   currentUserId = userId;
-  currentUsername = username;
-  document.getElementById("username").textContent = username;
+  currentEmail = email;
+  document.getElementById("userEmail").textContent = email;
 
   loadUsers();
   loadChores();
@@ -38,14 +39,21 @@ function loadUsers() {
 }
 
 function populateAssigneeDropdown() {
-  const select = document.getElementById("choreAssignee");
-  select.innerHTML = '<option value="">Select a family member</option>';
-  
-  allUsers.forEach(user => {
-    const option = document.createElement("option");
-    option.value = user.id;
-    option.textContent = user.username + (user.role === "OWNER" ? " (Owner)" : " (Member)");
-    select.appendChild(option);
+  const selects = [
+    document.getElementById("choreAssignee"),
+    document.getElementById("editChoreAssignee")
+  ].filter(Boolean);
+
+  selects.forEach(select => {
+    select.innerHTML = '<option value="">Select a worker</option>';
+    allUsers
+      .filter(user => user && user.id != null && user.email)
+      .forEach(user => {
+      const option = document.createElement("option");
+      option.value = user.id;
+      option.textContent = user.email + (user.role === "OWNER" ? " (Owner)" : " (Member)");
+      select.appendChild(option);
+    });
   });
 }
 
@@ -112,13 +120,17 @@ function displayChores(chores) {
       ? '<span class="badge-pending">Pending</span>'
       : '<span class="badge-completed">Completed</span>';
 
+    const editButton = chore.status === "PENDING"
+      ? `<button class="btn btn-sm btn-warning btn-sm-action" onclick="openEditModal(${chore.id})">Edit</button>`
+      : "";
+
     return `
       <tr>
         <td><strong>${chore.title}</strong></td>
         <td>${chore.dueDate}</td>
         <td>${statusBadge}</td>
         <td>
-          <button class="btn btn-sm btn-warning btn-sm-action" onclick="editChore(${chore.id})">Edit</button>
+          ${editButton}
           <button class="btn btn-sm btn-danger btn-sm-action" onclick="deleteChore(${chore.id})">Delete</button>
         </td>
       </tr>
@@ -142,10 +154,14 @@ function displayAllChores(chores) {
 
   tbody.innerHTML = chores.map(chore => {
     const user = allUsers.find(u => u.id === chore.workerId);
-    const username = user ? user.username : "Unassigned";
+    const username = user ? user.email : "Unassigned";
     const statusBadge = chore.status === "PENDING"
       ? '<span class="badge-pending">Pending</span>'
       : '<span class="badge-completed">Completed</span>';
+
+    const editButton = chore.status === "PENDING"
+      ? `<button class="btn btn-sm btn-warning btn-sm-action" onclick="openEditModal(${chore.id})">Edit</button>`
+      : "";
 
     return `
       <tr>
@@ -155,7 +171,7 @@ function displayAllChores(chores) {
         <td>${chore.dueDate}</td>
         <td>${statusBadge}</td>
         <td>
-          <button class="btn btn-sm btn-warning btn-sm-action" onclick="editChore(${chore.id})">Edit</button>
+          ${editButton}
           <button class="btn btn-sm btn-danger btn-sm-action" onclick="deleteChore(${chore.id})">Delete</button>
         </td>
       </tr>
@@ -205,20 +221,53 @@ function addChore(event) {
   });
 }
 
-function editChore(choreId) {
+function openEditModal(choreId) {
   const chore = allChores.find(c => c.id === choreId);
   if (!chore) return;
 
-  const newStatus = chore.status === "PENDING" ? "COMPLETED" : "PENDING";
-  
-  fetch(API_URL + "/api/chores/" + choreId, {
+  currentEditChoreId = choreId;
+  document.getElementById("editChoreId").value = choreId;
+  document.getElementById("editChoreTitle").value = chore.title || "";
+  document.getElementById("editChoreDescription").value = chore.description || "";
+  document.getElementById("editChoreDueDate").value = chore.dueDate || "";
+  document.getElementById("editChoreAssignee").value = chore.workerId || "";
+
+  const modal = new bootstrap.Modal(document.getElementById("editChoreModal"));
+  modal.show();
+}
+
+function saveChoreEdits() {
+  if (!currentEditChoreId) return;
+
+  const title = document.getElementById("editChoreTitle").value.trim();
+  const description = document.getElementById("editChoreDescription").value.trim();
+  const dueDate = document.getElementById("editChoreDueDate").value;
+  const workerId = document.getElementById("editChoreAssignee").value;
+
+  if (!title) {
+    showAlert("Please enter a chore title", "warning");
+    return;
+  }
+  if (!workerId) {
+    showAlert("Please select a family member", "warning");
+    return;
+  }
+
+  fetch(API_URL + "/api/chores/" + currentEditChoreId, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status: newStatus })
+    body: JSON.stringify({ title, description, dueDate, workerId })
   })
-  .then(res => res.json())
-  .then(data => {
-    showAlert(`Chore marked as ${newStatus}`, "success");
+  .then(res => {
+    if (!res.ok) throw new Error("Failed to update chore");
+    return res.json();
+  })
+  .then(() => {
+    const modalEl = document.getElementById("editChoreModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    currentEditChoreId = null;
+    showAlert("Chore updated successfully!", "success");
     loadChores();
   })
   .catch(err => {

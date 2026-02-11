@@ -1,5 +1,5 @@
 const workerId = localStorage.getItem("userId");
-const workerName = localStorage.getItem("username");
+const workerName = localStorage.getItem("email");
 const taskTable = document.getElementById("taskTable");
 const queryList = document.getElementById("queryList");
 const queryMessage = document.getElementById("queryMessage");

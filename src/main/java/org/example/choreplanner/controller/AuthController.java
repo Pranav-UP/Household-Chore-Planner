@@ -14,6 +14,8 @@ import java.util.Map;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private static final String OWNER_EMAIL = "mrpranav161@gmail.com";
+    private static final String OWNER_PASSWORD = "1131";
 
     public AuthController(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -21,10 +23,24 @@ public class AuthController {
 
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody User newUser) {
-        // Check if username already exists
-        User existingUser = userRepository.findByUsername(newUser.getUsername());
+        String email = newUser.getEmail() == null ? "" : newUser.getEmail().trim().toLowerCase();
+        if (!email.endsWith("@gmail.com")) {
+            throw new RuntimeException("Email must be a Gmail address");
+        }
+
+        if (OWNER_EMAIL.equals(email)) {
+            if (!OWNER_PASSWORD.equals(newUser.getPassword())) {
+                throw new RuntimeException("Invalid owner credentials");
+            }
+            newUser.setRole("OWNER");
+        } else if ("OWNER".equalsIgnoreCase(newUser.getRole())) {
+            throw new RuntimeException("Owner account is fixed");
+        }
+
+        // Check if email already exists
+        User existingUser = userRepository.findByEmail(email);
         if (existingUser != null) {
-            throw new RuntimeException("Username already exists");
+            throw new RuntimeException("Email already exists");
         }
 
         // Set default role if not provided
@@ -32,11 +48,12 @@ public class AuthController {
             newUser.setRole("MEMBER");
         }
 
+        newUser.setEmail(email);
         User savedUser = userRepository.save(newUser);
         
         Map<String, Object> response = new HashMap<>();
         response.put("id", savedUser.getId());
-        response.put("username", savedUser.getUsername());
+        response.put("email", savedUser.getEmail());
         response.put("role", savedUser.getRole());
         response.put("message", "Registration successful");
 
@@ -46,19 +63,49 @@ public class AuthController {
     @PostMapping("/login")
     public Map<String, String> login(@RequestBody User loginUser) {
 
-        User user = userRepository
-                .findByUsernameAndPassword(
-                        loginUser.getUsername(),
-                        loginUser.getPassword()
-                );
+        String email = loginUser.getEmail() == null ? "" : loginUser.getEmail().trim().toLowerCase();
+        if (!email.endsWith("@gmail.com")) {
+            throw new RuntimeException("Email must be a Gmail address");
+        }
+
+        if (OWNER_EMAIL.equals(email)) {
+            if (!OWNER_PASSWORD.equals(loginUser.getPassword())) {
+                throw new RuntimeException("Invalid login credentials");
+            }
+            User owner = userRepository.findByEmail(email);
+            if (owner == null) {
+                owner = new User();
+                owner.setEmail(email);
+                owner.setPassword(OWNER_PASSWORD);
+                owner.setRole("OWNER");
+                owner = userRepository.save(owner);
+            } else if (!"OWNER".equalsIgnoreCase(owner.getRole())) {
+                owner.setRole("OWNER");
+                owner = userRepository.save(owner);
+            }
+
+            Map<String, String> response = new HashMap<>();
+            response.put("role", owner.getRole());
+            response.put("email", owner.getEmail());
+            response.put("id", String.valueOf(owner.getId()));
+            return response;
+        }
+
+        User user = userRepository.findByEmail(email);
 
         if (user == null) {
+            User newUser = new User();
+            newUser.setEmail(email);
+            newUser.setPassword(loginUser.getPassword());
+            newUser.setRole("MEMBER");
+            user = userRepository.save(newUser);
+        } else if (!user.getPassword().equals(loginUser.getPassword())) {
             throw new RuntimeException("Invalid login credentials");
         }
 
         Map<String, String> response = new HashMap<>();
         response.put("role", user.getRole());
-        response.put("username", user.getUsername());
+        response.put("email", user.getEmail());
         response.put("id", String.valueOf(user.getId()));
 
         return response;

@@ -71,6 +71,38 @@
       font-size: 16px;
       font-family: "Sora", sans-serif;
     }
+    .password-field {
+      position: relative;
+    }
+    .password-field input {
+      padding-right: 44px;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      color: #6b6b6b;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .password-toggle:hover {
+      color: #0f766e;
+    }
+    .password-toggle .icon-eye-off {
+      display: none;
+    }
+    .password-toggle.is-visible .icon-eye {
+      display: none;
+    }
+    .password-toggle.is-visible .icon-eye-off {
+      display: inline-flex;
+    }
     .form-group input:focus {
       outline: none;
       border-color: #0f766e;
@@ -155,16 +187,30 @@
 
       <form onsubmit="login(event)">
         <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" placeholder="Enter your username" required>
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter your password" required>
-        </div>
-        <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
-          <input type="checkbox" id="togglePassword">
-          <label for="togglePassword" style="margin: 0; font-weight: 500;">Show password</label>
+          <div class="password-field">
+            <input type="password" id="password" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" id="togglePassword" aria-label="Show password">
+              <span class="icon-eye" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </span>
+              <span class="icon-eye-off" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M2 2l20 20"></path>
+                  <path d="M1 12s4-7 11-7c2.3 0 4.3.6 6 1.6"></path>
+                  <path d="M21 12s-4 7-11 7c-2.3 0-4.3-.6-6-1.6"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </span>
+            </button>
+          </div>
         </div>
         <button type="submit" class="btn-login">Sign In</button>
       </form>
@@ -174,14 +220,6 @@
       </div>
 
       <hr style="margin: 30px 0; color: #e5dfd6;">
-
-      <div style="background: #f9f7f3; padding: 16px; border-radius: 8px; font-size: 13px;">
-        <strong style="color: #0f766e;">Demo Credentials:</strong>
-        <p style="margin: 8px 0 0 0; color: #6b6b6b;">
-          📌 Owner: <code>owner</code> / <code>Owner@123</code><br>
-          👤 Worker: <code>worker1</code> / <code>Worker@123</code>
-        </p>
-      </div>
     </div>
 
   </div>
@@ -189,3 +227,5 @@
   <script src="/js/login.js?v=2"></script>
 </body>
 </html>
+
+

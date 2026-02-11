@@ -114,8 +114,8 @@
 
     <form id="registerForm" onsubmit="register(event)">
       <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" placeholder="Choose a username" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
       </div>
 
       <div class="form-group">
@@ -128,17 +128,9 @@
         <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
       </div>
 
-      <div class="form-group">
-        <label for="role">Account Type</label>
-        <select id="role" required>
-          <option value="">Select your role</option>
-          <option value="OWNER">Owner (Can create & assign chores)</option>
-          <option value="MEMBER">Member (Can complete assigned chores)</option>
-        </select>
-        <div class="role-info">
-          An Owner can create and assign chores to family members.
-          A Member can view and complete assigned chores.
-        </div>
+      <input type="hidden" id="role" value="MEMBER">
+      <div class="role-info">
+        Owner account is fixed. Register creates a Member account.
       </div>
 
       <button type="submit" class="btn-register">Create Account</button>

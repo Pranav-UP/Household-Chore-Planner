@@ -1,17 +1,22 @@
 const API_URL = window.location.origin === "null"
-  ? "http://localhost:8082"
+  ? "http://localhost:8080"
   : "";
 
 function register(event) {
   event.preventDefault();
 
-  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
   const role = document.getElementById("role").value;
   const messageDiv = document.getElementById("message");
 
   // Validation
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!normalizedEmail.endsWith("@gmail.com")) {
+    showMessage("Please use a Gmail address!", "warning");
+    return;
+  }
   if (password !== confirmPassword) {
     showMessage("Passwords do not match!", "danger");
     return;
@@ -26,7 +31,7 @@ function register(event) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: username,
+      email: normalizedEmail,
       password: password,
       role: role
     })

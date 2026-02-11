@@ -5,7 +5,7 @@ function login() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      username: username.value,
+      email: username.value,
       password: password.value
     })
   })
