@@ -32,6 +32,7 @@ function login(event) {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   if (!email || !password) {
+    alert("Please enter both email and password");
     return;
   }
   const normalizedEmail = email.trim().toLowerCase();
@@ -65,7 +66,9 @@ function login(event) {
     }
     localStorage.setItem("role", role);
     localStorage.setItem("email", data.email);
+    // Store both new and legacy keys so older pages keep working
     localStorage.setItem("userId", data.id);
+    localStorage.setItem("id", data.id);
 
     if (role === "OWNER" || role === "ADMIN") {
       window.location.href = "/owner-dashboard.html";
@@ -75,5 +78,6 @@ function login(event) {
   })
   .catch(error => {
     console.warn("Login failed:", error);
+    alert("Login failed: " + error.message);
   });
 }

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Owner Dashboard - Chore Planner</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
   <style>
     body {
@@ -172,6 +173,209 @@
     .empty-state p {
       margin-top: 10px;
     }
+    .query-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+    }
+    .query-card.unread {
+      border-left: 4px solid #0f766e;
+      background: #f0fffe;
+    }
+    .query-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .query-subject {
+      font-weight: 600;
+      color: #0f766e;
+      margin: 0;
+    }
+    .query-date {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .query-message {
+      margin: 10px 0;
+      color: #374151;
+    }
+    .query-reply {
+      background: #f9fafb;
+      border-left: 3px solid #0f766e;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 4px;
+    }
+    .btn-reply {
+      background: #0f766e;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-query {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-right: 10px;
+      position: relative;
+      font-size: 16px;
+    }
+    .btn-query:hover {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+      transform: translateY(-1px);
+    }
+    .query-badge {
+      background: #dc2626;
+      color: white;
+      border-radius: 50%;
+      padding: 2px 6px;
+      font-size: 10px;
+      font-weight: bold;
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      min-width: 18px;
+      text-align: center;
+    }
+    .queries-panel {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      width: 450px;
+      max-height: 600px;
+      background: white;
+      border: 1px solid #e5dfd6;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      overflow: hidden;
+      display: none;
+    }
+    .queries-panel-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid #e5dfd6;
+      background: #f8fafc;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .queries-panel-body {
+      padding: 0;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .chat-message {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f1f5f9;
+      position: relative;
+    }
+    .chat-message:hover {
+      background: #f8fafc;
+    }
+    .chat-message.worker-message {
+      background: #f0f9ff;
+      border-left: 3px solid #0ea5e9;
+    }
+    .chat-message.owner-reply {
+      background: #f0fdf4;
+      border-left: 3px solid #22c55e;
+      margin-left: 20px;
+    }
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .message-sender {
+      font-weight: 600;
+      color: #0f766e;
+      font-size: 13px;
+    }
+    .message-time {
+      font-size: 11px;
+      color: #64748b;
+    }
+    .message-content {
+      color: #334155;
+      font-size: 13px;
+      line-height: 1.4;
+      margin-bottom: 8px;
+    }
+    .message-actions {
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .chat-message:hover .message-actions {
+      opacity: 1;
+    }
+    .btn-message-action {
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-message-action:hover {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .reply-form {
+      padding: 15px;
+      border-top: 1px solid #e5dfd6;
+      background: #f8fafc;
+    }
+    .reply-input {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 60px;
+    }
+    .reply-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-reply-send {
+      background: #0f766e;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-reply-cancel {
+      background: #6b7280;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -182,7 +386,7 @@
         <span style="margin-right: 10px;">🏠</span> Chore Planner - Owner
       </div>
       <div>
-        <span style="color: white; margin-right: 20px;">Welcome, <strong id="userEmail"></strong></span>
+        <span style="color: white; margin-right: 20px; margin-left: 15px;">Welcome, <strong id="userEmail"></strong></span>
         <button class="btn-logout" onclick="logout()">Logout</button>
       </div>
     </div>
@@ -306,7 +510,6 @@
         </table>
       </div>
     </div>
-  </div>
 
   <!-- Edit Chore Modal -->
   <div class="modal fade" id="editChoreModal" tabindex="-1" aria-labelledby="editChoreModalLabel" aria-hidden="true">
@@ -353,3 +556,4 @@
   <script src="/js/owner-dashboard.js"></script>
 </body>
 </html>
+

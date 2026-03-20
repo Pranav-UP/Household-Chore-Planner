@@ -1,6 +1,10 @@
-const API_URL = window.location.origin === "null"
-  ? "http://localhost:8080"
-  : "";
+const API_URL = (() => {
+  const override = window.API_BASE_URL || window.apiBaseUrl;
+  if (override && override.trim()) return override.replace(/\/$/, "");
+  const origin = window.location.origin;
+  if (!origin || origin === "null") return "http://localhost:8080";
+  return origin.replace(/\/$/, "");
+})();
 
 let currentUserId = null;
 let currentEmail = null;
@@ -44,11 +48,19 @@ function populateAssigneeDropdown() {
     document.getElementById("editChoreAssignee")
   ].filter(Boolean);
 
+  const usersToShow = allUsers
+    .filter(user => user && user.id != null && user.email);
+
+  // Fallback: if API returned no members, show the built-in default workers so owner can still assign
+  const fallbackUsers = [
+    { id: 'worker1@gmail.com', email: 'worker1@gmail.com', role: 'WORKER' },
+    { id: 'worker2@gmail.com', email: 'worker2@gmail.com', role: 'WORKER' }
+  ];
+  const list = usersToShow.length > 0 ? usersToShow : fallbackUsers;
+
   selects.forEach(select => {
     select.innerHTML = '<option value="">Select a worker</option>';
-    allUsers
-      .filter(user => user && user.id != null && user.email)
-      .forEach(user => {
+    list.forEach(user => {
       const option = document.createElement("option");
       option.value = user.id;
       option.textContent = user.email + (user.role === "OWNER" ? " (Owner)" : " (Member)");
@@ -308,3 +320,12 @@ function logout() {
   localStorage.clear();
   window.location.href = "/login.html";
 }
+
+// Query feature removed
+function loadQueries() {}
+function displayQueries() {}
+function openReplyModal() {}
+function sendReply() {}
+function toggleQueriesPanel() {}
+function openOwnerChatBox() {}
+

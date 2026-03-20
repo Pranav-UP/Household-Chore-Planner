@@ -44,33 +44,8 @@
         <table class="table" id="taskTable"></table>
       </section>
 
-      <section class="card">
-        <h2>Query owner</h2>
-        <p class="subtitle">Send a quick note if something is blocked.</p>
-        <div class="field">
-          <label for="queryMessage">Message</label>
-          <textarea id="queryMessage" placeholder="Describe your issue or question"></textarea>
-        </div>
-        <button class="btn btn-primary" onclick="sendQuery()">Send query</button>
-        <div id="queryList" class="chat" style="margin-top: 16px;"></div>
       </section>
     </main>
-  </div>
-
-  <button class="chat-fab" onclick="toggleChat()" aria-label="Open chat">Open chat</button>
-  <div id="chatPopover" class="chat-popover" role="dialog" aria-label="Owner replies">
-    <div class="chat-header">
-      <strong>Owner replies</strong>
-      <button class="btn btn-secondary" onclick="toggleChat()">Close</button>
-    </div>
-    <div class="chat-body" id="queryListPopover"></div>
-    <div class="chat-input">
-      <div class="field">
-        <label for="queryMessagePopover">Message</label>
-        <textarea id="queryMessagePopover" placeholder="Describe your issue or question"></textarea>
-      </div>
-      <button class="btn btn-primary" onclick="sendQueryFromPopover()">Send query</button>
-    </div>
   </div>
 
   <script src="/js/worker.js"></script>

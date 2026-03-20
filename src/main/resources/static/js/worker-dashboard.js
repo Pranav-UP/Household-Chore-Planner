@@ -1,24 +1,35 @@
-const API_URL = window.location.origin === "null"
-  ? "http://localhost:8080"
-  : "";
+const API_URL = (() => {
+  // Allow overriding base URL via a global (useful when front-end served from a different port)
+  const override = window.API_BASE_URL || window.apiBaseUrl;
+  if (override && override.trim()) return override.replace(/\/$/, "");
+  const origin = window.location.origin;
+  if (!origin || origin === "null") return "http://localhost:8080";
+  return origin.replace(/\/$/, "");
+})();
 
 let currentUserId = null;
 let currentEmail = null;
 let allChores = [];
 let currentFilter = "ALL";
-
 // Check authentication
 window.addEventListener('DOMContentLoaded', () => {
   const role = localStorage.getItem("role");
-  const userId = localStorage.getItem("userId");
+  const userId = localStorage.getItem("userId") || localStorage.getItem("id");
   const email = localStorage.getItem("email");
 
-  if (!role || (role !== "MEMBER" && role !== "WORKER")) {
+  // Guard against missing/invalid identity which breaks query chat
+  if (!role || (role !== "MEMBER" && role !== "WORKER") || !userId || !email) {
+    localStorage.clear();
     window.location.href = "/login.html";
     return;
   }
 
-  currentUserId = userId;
+  currentUserId = parseInt(userId, 10);
+  if (Number.isNaN(currentUserId)) {
+    localStorage.clear();
+    window.location.href = "/login.html";
+    return;
+  }
   currentEmail = email;
   document.getElementById("userEmail").textContent = email;
 
@@ -52,7 +63,6 @@ function updateStats() {
 function filterChores(filterValue) {
   currentFilter = filterValue;
   
-  // Update active button
   document.querySelectorAll('.btn-filter').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -155,3 +165,6 @@ function logout() {
   localStorage.clear();
   window.location.href = "/login.html";
 }
+
+
+

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Query Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 20px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Query System Test</h1>
+        
+        <div class="form-group">
+            <label>Worker ID:</label>
+            <input type="number" id="workerId" value="1">
+        </div>
+        
+        <div class="form-group">
+            <label>Worker Name:</label>
+            <input type="text" id="workerName" value="test@example.com">
+        </div>
+        
+        <div class="form-group">
+            <label>Subject:</label>
+            <input type="text" id="subject" value="Test Query">
+        </div>
+        
+        <div class="form-group">
+            <label>Message:</label>
+            <textarea id="message" rows="4">This is a test message to verify the query system is working.</textarea>
+        </div>
+        
+        <button onclick="sendQuery()">Send Query</button>
+        <button onclick="loadQueries()">Load Queries</button>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8080';
+        
+        function sendQuery() {
+            const queryData = {
+                workerId: parseInt(document.getElementById('workerId').value),
+                workerName: document.getElementById('workerName').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+            
+            console.log('Sending query:', queryData);
+            
+            fetch(API_URL + '/api/queries', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(queryData)
+            })
+            .then(res => {
+                console.log('Response status:', res.status);
+                if (!res.ok) throw new Error('Failed to send query');
+                return res.json();
+            })
+            .then(data => {
+                console.log('Query sent successfully:', data);
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = '<h3>Success!</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = '<h3>Error!</h3><p>' + err.message + '</p>';
+            });
+        }
+        
+        function loadQueries() {
+            fetch(API_URL + '/api/queries')
+            .then(res => {
+                console.log('Response status:', res.status);
+                if (!res.ok) throw new Error('Failed to load queries');
+                return res.json();
+            })
+            .then(data => {
+                console.log('Queries loaded:', data);
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = '<h3>All Queries:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('result').innerHTML = '<h3>Error!</h3><p>' + err.message + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -2,7 +2,9 @@ package org.example.choreplanner.controller;
 
 import org.example.choreplanner.entity.Chore;
 import org.example.choreplanner.repository.ChoreRepository;
+
 import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -12,7 +14,6 @@ import java.util.List;
 public class ChoreController {
 
     private final ChoreRepository repo;
-
     public ChoreController(ChoreRepository repo) {
         this.repo = repo;
     }
@@ -71,9 +72,11 @@ public class ChoreController {
 
     // WORKER: mark completed
     @PutMapping("/{id}/complete")
+    @Transactional
     public Chore complete(@PathVariable Long id) {
         Chore c = repo.findById(id).orElseThrow(() -> new RuntimeException("Chore not found"));
         c.setStatus("COMPLETED");
+        
         return repo.save(c);
     }
 
