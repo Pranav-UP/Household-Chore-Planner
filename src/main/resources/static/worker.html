@@ -3,49 +3,115 @@
 <head>
   <meta charset="UTF-8">
   <title>Worker Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/lib/stomp.min.js"></script>
+  <style>
+    /* Chat UI - reused from owner */
+    .btn-query { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3); padding: 8px 16px; border-radius: 8px; cursor: pointer; position: relative; margin-left: 10px; font-size: 16px; }
+    .btn-query:hover { background: rgba(255,255,255,0.3); color: white; }
+    .query-badge { background: #dc2626; color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; position: absolute; top: -5px; right: -5px; min-width: 18px; text-align: center; }
+    .queries-panel { position: fixed; top: 70px; right: 20px; width: 450px; max-height: 600px; background: white; border: 1px solid #e5dfd6; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1000; overflow: hidden; display: none; }
+    .queries-panel-header { padding: 15px 20px; border-bottom: 1px solid #e5dfd6; background: #f8fafc; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .queries-panel-body { padding: 0; max-height: 500px; overflow-y: auto; }
+    .chat-message { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; }
+    .chat-message.worker-message { background: #f0f9ff; border-left: 3px solid #0ea5e9; }
+    .chat-message.owner-reply { background: #f0fdf4; border-left: 3px solid #22c55e; margin-left: 20px; }
+    .message-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .message-sender { font-weight: 600; color: #0f766e; font-size: 13px; }
+    .message-time { font-size: 11px; color: #64748b; }
+    .message-content { color: #334155; font-size: 13px; line-height: 1.4; }
+    .reply-form { padding: 15px; border-top: 1px solid #e5dfd6; background: #f8fafc; }
+    .reply-input { width: 100%; border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-size: 13px; resize: vertical; min-height: 60px; box-sizing: border-box; }
+    .reply-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+    .btn-reply-send { background: #0f766e; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .btn-reply-cancel { background: #6b7280; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    .header { background: linear-gradient(135deg, #0f766e 0%, #0a5d56 100%); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .pill { background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 14px; }
+    .page { max-width: 1200px; margin: 0 auto; padding-bottom: 20px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 20px; margin: 20px; }
+    .stat { background: white; padding: 25px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .stat .value { font-size: 32px; font-weight: 700; color: #0f766e; margin-bottom: 5px; }
+    .stat .subtitle { color: #6b7280; font-size: 14px; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .table th { background: #f8fafc; padding: 12px; text-align: left; font-weight: 600; color: #374151; border-bottom: 2px solid #e5e7eb; }
+    .table td { padding: 12px; border-bottom: 1px solid #f3f4f6; }
+    .table-hover tbody tr:hover { background-color: #f9fafb; }
+    .chat-col { text-align: center; }
+    .chat-col button { background: none; border: none; font-size: 18px; color: #6b7280; cursor: pointer; padding: 8px; }
+    .chat-col button:hover { color: #0f766e; }
+  </style>
 </head>
 <body>
-
   <div class="page">
     <header class="header">
       <div class="brand">
-        <div class="logo"></div>
-        <div>
-          <h1 class="title">Worker Dashboard</h1>
-          <p class="subtitle">Stay focused on the next task.</p>
-        </div>
+        <h1 style="margin: 0; font-size: 28px;">🏠 Chore Planner</h1>
+        <p style="margin: 0; opacity: 0.9; font-size: 16px;">Worker Dashboard</p>
       </div>
       <div style="display: flex; gap: 10px; align-items: center;">
         <span class="pill">Worker</span>
+        <button class="btn-query" id="chatToggle" onclick="toggleWorkerChat()" title="Open Chat">
+          <i class="fas fa-comments"></i>
+          <span class="query-badge" id="chatBadge" style="display: none;">0</span>
+        </button>
         <button class="btn btn-secondary" onclick="logout()">Logout</button>
       </div>
     </header>
 
-    <section class="stat-grid" style="margin-bottom: 20px;">
+    <section class="stat-grid">
       <div class="stat">
-        <div class="value">4</div>
+        <div class="value" id="assignedCount">0</div>
         <div class="subtitle">Assigned to you</div>
       </div>
       <div class="stat">
-        <div class="value">2</div>
+        <div class="value" id="dueTodayCount">0</div>
         <div class="subtitle">Due today</div>
       </div>
       <div class="stat">
-        <div class="value">1</div>
-        <div class="subtitle">Awaiting reply</div>
+        <div class="value" id="completedCount">0</div>
+        <div class="subtitle">Completed</div>
       </div>
     </section>
 
-    <main class="grid">
-      <section class="card">
-        <h2>My chores</h2>
-        <p class="subtitle">Complete and keep the queue clear.</p>
-        <table class="table" id="taskTable"></table>
-      </section>
-
+    <main>
+      <section class="card" style="margin: 20px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="color: #1f2937; margin: 0; font-size: 24px;">📋 My Chores</h2>
+        </div>
+        <table class="table" id="taskTable">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Description</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th style="width: 80px;">Chat</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
       </section>
     </main>
+  </div>
+
+  <!-- Chat Panel -->
+  <div class="queries-panel" id="workerChatPanel">
+    <div class="queries-panel-header">
+      <span>Chat <small id="workerChatChoreTitle"></small></span>
+      <button onclick="toggleWorkerChat()" style="background: none; border: none; font-size: 20px; cursor: pointer;">×</button>
+    </div>
+    <div class="queries-panel-body" id="workerChatMessages"></div>
+    <div class="reply-form">
+      <textarea id="workerReplyInput" class="reply-input" placeholder="Type message to owner..."></textarea>
+      <div class="reply-actions">
+        <button class="btn-reply-cancel" onclick="cancelWorkerReply()">Cancel</button>
+        <button class="btn-reply-send" onclick="sendWorkerReply()">Send</button>
+      </div>
+    </div>
   </div>
 
   <script src="/js/worker.js"></script>

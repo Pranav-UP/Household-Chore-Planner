@@ -321,11 +321,119 @@ function logout() {
   window.location.href = "/login.html";
 }
 
-// Query feature removed
-function loadQueries() {}
-function displayQueries() {}
-function openReplyModal() {}
-function sendReply() {}
-function toggleQueriesPanel() {}
-function openOwnerChatBox() {}
+let currentChoreId = null;
+let stompClient = null;
+let queryPanel = null;
+
+// Initialize chat when DOM ready
+window.addEventListener('DOMContentLoaded', () => {
+  // existing code...
+  queryPanel = document.querySelector('.queries-panel') || createQueriesPanel();
+  setupChatListeners();
+});
+
+function setupChatListeners() {
+  // Add click listeners to chat column or icons in table
+  document.addEventListener('click', (e) => {
+    if (e.target.matches('.chat-btn, .chat-link')) {
+      currentChoreId = e.target.dataset.choreId;
+      toggleQueriesPanel();
+    }
+  });
+}
+
+function createQueriesPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'queries-panel';
+  panel.innerHTML = `
+    <div class="queries-panel-header">
+      <span>Chat <small id="chatChoreTitle"></small></span>
+      <button onclick="toggleQueriesPanel()" style="background:none;border:none;font-size:20px;cursor:pointer;">×</button>
+    </div>
+    <div class="queries-panel-body" id="chatMessages"></div>
+    <div class="reply-form">
+      <textarea id="replyInput" class="reply-input" placeholder="Type your message..."></textarea>
+      <div class="reply-actions">
+        <button class="btn-reply-cancel" onclick="cancelReply()">Cancel</button>
+        <button class="btn-reply-send" onclick="sendReply()">Send</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(panel);
+  return panel;
+}
+
+function toggleQueriesPanel() {
+  if (!currentChoreId) return alert('Select a chore first');
+  
+  if (queryPanel.style.display === 'block') {
+    queryPanel.style.display = 'none';
+  } else {
+    document.getElementById('chatChoreTitle').textContent = allChores.find(c => c.id == currentChoreId)?.title || '';
+    loadQueries(currentChoreId);
+    connectWebSocket(currentChoreId);
+    queryPanel.style.display = 'block';
+  }
+}
+
+function loadQueries(choreId) {
+  fetch(`${API_URL}/api/chat/${choreId}`)
+    .then(res => res.json())
+    .then(messages => {
+      document.getElementById('chatMessages').innerHTML = messages.map(msg => `
+        <div class="chat-message ${msg.senderRole === 'OWNER' ? 'owner-reply' : 'worker-message'}">
+          <div class="message-header">
+            <span class="message-sender">${msg.senderRole}</span>
+            <span class="message-time">${new Date(msg.timestamp).toLocaleTimeString()}</span>
+          </div>
+          <div class="message-content">${msg.message}</div>
+        </div>
+      `).join('');
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    });
+}
+
+function connectWebSocket(choreId) {
+  if (stompClient) stompClient.disconnect();
+  
+  const socket = new SockJS(`${API_URL}/ws`);
+  stompClient = Stomp.over(socket);
+  stompClient.connect({}, () => {
+    stompClient.subscribe(`/topic/chat/${choreId}`, (msg) => {
+      const message = JSON.parse(msg.body);
+      const div = document.createElement('div');
+      div.className = `chat-message ${message.senderRole === 'OWNER' ? 'owner-reply' : 'worker-message'}`;
+      div.innerHTML = `
+        <div class="message-header">
+          <span class="message-sender">${message.senderRole}</span>
+          <span class="message-time">${new Date(message.timestamp).toLocaleTimeString()}</span>
+        </div>
+        <div class="message-content">${message.message}</div>
+      `;
+      document.getElementById('chatMessages').appendChild(div);
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    });
+  });
+}
+
+function sendReply() {
+  const input = document.getElementById('replyInput');
+  const message = input.value.trim();
+  if (!message || !currentChoreId || !stompClient) return;
+
+  const msgData = {
+    choreId: currentChoreId,
+    senderId: currentUserId,
+    senderRole: 'OWNER',
+    message: message,
+    timestamp: new Date().toISOString()
+  };
+
+  stompClient.send(`/app/chat.send/${currentChoreId}`, {}, JSON.stringify(msgData));
+  input.value = '';
+}
+
+function cancelReply() {
+  document.getElementById('replyInput').value = '';
+}
 

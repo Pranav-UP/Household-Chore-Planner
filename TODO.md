@@ -1,10 +1,11 @@
-# Chore Planner Port Fix TODO - COMPLETE
+# Chat Box Implementation (Approved Plan)
 
 ## Steps:
-- [x] Step 1: Identify process using port 8080
-- [x] Step 2: Kill the process on port 8080
-- [x] Step 3: Add fallback server.port=8081 to application.properties
-- [x] Step 4: Test application startup with `mvn spring-boot:run` (Started successfully on port 8081)
-- [x] Step 5: Verify app accessible at http://localhost:8081 (or 8080 if freed)
+- [x] Step 0: Plan created and approved by user
+- [x] Step 1: Update owner-dashboard.js with full chat logic (toggle, load, send, WebSocket)
+- [x] Step 2: Add chat icon/panel to worker.html navbar (reuse CSS)
+- [x] Step 3: Update worker.js with chat functions (symmetric to owner)
+- [ ] Step 4: Test chat between owner/worker on live server (per-chore)
+- [ ] Step 5: Commit changes to new branch blackboxai/chat-box, create PR
 
-Application is now running successfully on http://localhost:8081. You can access index.html and other static resources there.
+Current status: Server running on 8081, backend ready.
