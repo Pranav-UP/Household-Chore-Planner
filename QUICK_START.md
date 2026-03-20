@@ -195,6 +195,7 @@ DELETE /api/chores/{id}             - Delete chore
 ## 🚨 Troubleshooting
 
 **Problem**: Application won't start
+- Solution (Windows port conflict): `netstat -ano | findstr :8080` then `taskkill /PID [PID] /F`
 - Solution: Ensure MySQL is running and `chore_planner_db` database exists
 
 **Problem**: Can't login

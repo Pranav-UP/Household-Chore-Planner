@@ -1,11 +1,12 @@
-# Chat Box Implementation (Approved Plan)
+# Port Fix Task - blackboxai/port-fix-8080
+
+Current branch: blackboxai/chat-box (will create new branch)
 
 ## Steps:
-- [x] Step 0: Plan created and approved by user
-- [x] Step 1: Update owner-dashboard.js with full chat logic (toggle, load, send, WebSocket)
-- [x] Step 2: Add chat icon/panel to worker.html navbar (reuse CSS)
-- [x] Step 3: Update worker.js with chat functions (symmetric to owner)
-- [ ] Step 4: Test chat between owner/worker on live server (per-chore)
-- [ ] Step 5: Commit changes to new branch blackboxai/chat-box, create PR
-
-Current status: Server running on 8081, backend ready.
+- [ ] 1. Create new branch `blackboxai/port-fix-8080`
+- [ ] 2. Edit src/main/resources/application.properties: change server.port to 8080
+- [ ] 3. Update QUICK_START.md: add port troubleshooting section with netstat/taskkill commands for Windows
+- [ ] 4. git add, commit "Fix port 8081 conflict: use 8080 + Windows troubleshooting docs"
+- [ ] 5. git push origin blackboxai/port-fix-8080
+- [ ] 6. gh pr create -> main
+- [ ] 7. Test mvnw spring-boot:run on port 8080
