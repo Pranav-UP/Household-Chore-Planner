@@ -1,26 +1,10 @@
-# Chore Chat Implementation Plan
+# Chore Planner Port Fix TODO - COMPLETE
 
-## Status: In Progress ✅
+## Steps:
+- [x] Step 1: Identify process using port 8080
+- [x] Step 2: Kill the process on port 8080
+- [x] Step 3: Add fallback server.port=8081 to application.properties
+- [x] Step 4: Test application startup with `mvn spring-boot:run` (Started successfully on port 8081)
+- [x] Step 5: Verify app accessible at http://localhost:8081 (or 8080 if freed)
 
-### 1. Backend Foundation (Pending)
-- [x] Create QueryMessage entity (with choreId, senderId/role, message, timestamp, deleted flag)
-- [x] Create QueryRepository (findByChoreIdAndDeletedFalse, softDeleteByChoreId)
-- [x] Create QueryController (REST: get/post chat/{choreId}, WebSocket handler)
-- [ ] Update Chore.java (@OneToMany messages)
-- [x] Update ChoreController.complete() → softDelete messages
-
-### 2. WebSocket
-- [x] Create ChatController (STOMP @MessageMapping /chat.send, subscribe /topic/chat/{choreId})
-
-### 3. Frontend (Pending)
-- [ ] owner-dashboard.html/js: Per-chore 💬 button → modal with header "Task: {title} | Worker: {email}", messages, input, SockJS/STOMP
-- [ ] worker-dashboard.html/js: Same, header "Task: {title} | Owner: {email}"
-- [ ] Real-time subscribe /topic/chat/{choreId}, send to /app/chat.send/{choreId}
-
-### 4. Testing & Polish
-- [ ] mvn compile && mvn spring-boot:run
-- [ ] Test: Create chore → chat → complete → messages deleted
-- [ ] Multi-task worker: separate chats visible
-
-**Next Step: Backend entities/repos**
-
+Application is now running successfully on http://localhost:8081. You can access index.html and other static resources there.
