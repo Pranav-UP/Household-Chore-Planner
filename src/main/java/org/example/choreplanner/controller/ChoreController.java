@@ -2,6 +2,7 @@ package org.example.choreplanner.controller;
 
 import org.example.choreplanner.entity.Chore;
 import org.example.choreplanner.repository.ChoreRepository;
+import org.example.choreplanner.repository.QueryRepository;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,8 +15,11 @@ import java.util.List;
 public class ChoreController {
 
     private final ChoreRepository repo;
-    public ChoreController(ChoreRepository repo) {
+    private final QueryRepository queryRepo;
+    
+    public ChoreController(ChoreRepository repo, QueryRepository queryRepo) {
         this.repo = repo;
+        this.queryRepo = queryRepo;
     }
 
     // OWNER: assign chore
@@ -70,12 +74,15 @@ public class ChoreController {
         return repo.save(c);
     }
 
-    // WORKER: mark completed
+    // WORKER: mark completed - deletes associated chat
     @PutMapping("/{id}/complete")
     @Transactional
     public Chore complete(@PathVariable Long id) {
         Chore c = repo.findById(id).orElseThrow(() -> new RuntimeException("Chore not found"));
         c.setStatus("COMPLETED");
+        
+        // Auto-delete chat messages
+        queryRepo.softDeleteByChoreId(id);
         
         return repo.save(c);
     }

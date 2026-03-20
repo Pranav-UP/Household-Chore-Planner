@@ -1,28 +1,26 @@
-# Remove Query Chat from Worker Dashboard - IN PROGRESS
+# Chore Chat Implementation Plan
 
-## Previous Task Status
-**Real-time WebSocket STOMP Upgrade - CANCELLED (feature removal)**
+## Status: In Progress ✅
 
-## Current Task: Remove query chat from worker dashboard and delete query-related files
-**Approved Plan**: Yes to all - frontend removal, backend deletion, legacy cleanup.
+### 1. Backend Foundation (Pending)
+- [x] Create QueryMessage entity (with choreId, senderId/role, message, timestamp, deleted flag)
+- [x] Create QueryRepository (findByChoreIdAndDeletedFalse, softDeleteByChoreId)
+- [x] Create QueryController (REST: get/post chat/{choreId}, WebSocket handler)
+- [ ] Update Chore.java (@OneToMany messages)
+- [x] Update ChoreController.complete() → softDelete messages
 
-### Steps:
-- [x] **Prep 1**: Analyzed files (worker-dashboard.html/js, QueryController.java/repo/entity, WebSocketConfig.java, legacy worker.html/js)
-- [x] **Prep 2**: Confirmed WebSocketConfig generic (/topic, /ws) - no query-specific breakage
-- [x] **Step 1**: Edit worker-dashboard.html - remove Query Chat section, queriesPanel, SockJS/STOMP CDNs
-- [x] **Step 2**: Edit worker-dashboard.js - remove stubbed query functions
-- [x] **Step 3**: Delete backend files - QueryController.java, QueryRepository.java, QueryMessage.java
-- [x] **Step 4**: Clean legacy - remove query sections from worker.html and worker.js
-- [x] **Step 5**: Update TODO.md as completed, test app
+### 2. WebSocket
+- [x] Create ChatController (STOMP @MessageMapping /chat.send, subscribe /topic/chat/{choreId})
 
-**TASK COMPLETED ✅** Worker dashboard query chat fully removed, backend deleted, legacy cleaned. App ready to run.
+### 3. Frontend (Pending)
+- [ ] owner-dashboard.html/js: Per-chore 💬 button → modal with header "Task: {title} | Worker: {email}", messages, input, SockJS/STOMP
+- [ ] worker-dashboard.html/js: Same, header "Task: {title} | Owner: {email}"
+- [ ] Real-time subscribe /topic/chat/{choreId}, send to /app/chat.send/{choreId}
 
-## Test Commands
-```
-mvn clean compile
-mvn spring-boot:run
-# Login as worker -> worker-dashboard.html: verify chores only, no query UI, no errors
-# Check backend compiles/runs without Query classes
-```
+### 4. Testing & Polish
+- [ ] mvn compile && mvn spring-boot:run
+- [ ] Test: Create chore → chat → complete → messages deleted
+- [ ] Multi-task worker: separate chats visible
 
-**Next Action**: Implementing Step 1.
+**Next Step: Backend entities/repos**
+
