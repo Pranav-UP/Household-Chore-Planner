@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Worker Dashboard • Chore Planner</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+  <style>
+    body { background:#f5f7fb; font-family: "Inter", system-ui, -apple-system, sans-serif; }
+    .nav-gradient { background: linear-gradient(135deg,#0ea5e9,#0f766e); }
+    .card { border:none; box-shadow:0 12px 30px rgba(0,0,0,0.06); }
+    .badge-priority { padding:6px 10px; border-radius:999px; font-weight:600; font-size:12px; }
+    .priority-LOW { background:#e0f2fe; color:#0369a1; }
+    .priority-MEDIUM { background:#fef9c3; color:#92400e; }
+    .priority-HIGH { background:#fee2e2; color:#b91c1c; }
+    .status-pill { padding:6px 10px; border-radius:999px; font-weight:600; font-size:12px; }
+    .status-PENDING { background:#fff7ed; color:#c2410c; }
+    .status-COMPLETED { background:#ecfdf3; color:#15803d; }
+    .status-OVERDUE { background:#fee2e2; color:#b91c1c; }
+    .chat-panel { position: fixed; right: 16px; bottom: 16px; width: 320px; max-height: 480px; background:#fff; border:1px solid #e5e7eb; border-radius:14px; box-shadow:0 12px 30px rgba(0,0,0,0.12); display:none; flex-direction:column; z-index:1050; }
+    .chat-header { padding:12px 14px; border-bottom:1px solid #e5e7eb; display:flex; justify-content:space-between; align-items:center; }
+    .chat-body { padding:12px; overflow-y:auto; flex:1; }
+    .chat-input { padding:10px; border-top:1px solid #e5e7eb; }
+    .bubble { max-width: 85%; padding:10px 12px; border-radius:12px; margin-bottom:8px; }
+    .bubble.me { background:#0ea5e9; color:white; margin-left:auto; }
+    .bubble.them { background:#f3f4f6; color:#111827; margin-right:auto; }
+    .bubble small { display:block; color:rgba(255,255,255,0.8); }
+    .bubble.them small { color:#6b7280; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg nav-gradient navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="#">Chore Planner • Worker</a>
+      <div class="d-flex align-items-center gap-3">
+        <span class="text-white small" id="userEmail"></span>
+        <span class="position-relative">
+          <i class="fa fa-bell text-white" id="notifBell"></i>
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifDot">!</span>
+        </span>
+        <button class="btn btn-sm btn-light" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="card p-3">
+          <h6 class="text-muted text-uppercase small mb-1">Total Assigned</h6>
+          <div class="fs-3 fw-bold" id="totalAssigned">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card p-3">
+          <h6 class="text-muted text-uppercase small mb-1">Pending</h6>
+          <div class="fs-3 fw-bold text-warning" id="pendingCount">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card p-3">
+          <h6 class="text-muted text-uppercase small mb-1">Completed</h6>
+          <div class="fs-3 fw-bold text-success" id="completedCount">0</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card p-3">
+          <h6 class="text-muted text-uppercase small mb-1">Progress</h6>
+          <div class="progress" style="height:10px;">
+            <div class="progress-bar" id="progressBar" role="progressbar" style="width:0%"></div>
+          </div>
+          <small id="progressLabel" class="text-muted"></small>
+        </div>
+      </div>
+    </div>
+
+    <div class="card p-3 mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Your Chores</h5>
+        <div class="btn-group btn-group-sm">
+          <button class="btn btn-outline-secondary active" data-filter="ALL" onclick="setFilter(event)">All</button>
+          <button class="btn btn-outline-warning" data-filter="PENDING" onclick="setFilter(event)">Pending</button>
+          <button class="btn btn-outline-success" data-filter="COMPLETED" onclick="setFilter(event)">Completed</button>
+        </div>
+      </div>
+      <div id="alertMessage" class="alert alert-info d-none mb-2"></div>
+      <div id="choresList" class="row g-3"></div>
+    </div>
+  </main>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+      <div>
+        <div class="fw-semibold" id="chatTitle">Chat</div>
+        <small class="text-muted" id="chatSubtitle"></small>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary" onclick="toggleChat(false)">×</button>
+    </div>
+    <div class="chat-body" id="chatMessages"></div>
+    <div class="chat-input">
+      <div class="input-group input-group-sm">
+        <input type="text" class="form-control" id="chatInput" placeholder="Type a message...">
+        <button class="btn btn-primary" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/sockjs.min.js"></script>
+  <script src="/js/stomp.min.js"></script>
+  <script src="/js/worker-dashboard.js"></script>
+</body>
+</html>
