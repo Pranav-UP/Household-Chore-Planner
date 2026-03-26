@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/chat")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class QueryController {
 
     private final QueryRepository repo;

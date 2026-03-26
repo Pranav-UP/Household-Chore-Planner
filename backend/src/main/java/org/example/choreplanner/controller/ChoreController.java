@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chores")
-@CrossOrigin
+@CrossOrigin(origins = "*")
 public class ChoreController {
 
     private final ChoreRepository repo;
