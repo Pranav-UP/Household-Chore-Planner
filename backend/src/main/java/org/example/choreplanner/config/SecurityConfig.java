@@ -23,19 +23,10 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/api/auth/**",
-                    "/h2-console/**",
-                    "/**/*.html",
-                    "/js/**",
-                    "/css/**",
-                    "/",
-                    "/static/**"
-                ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
             .formLogin(form -> form.disable())
-            .httpBasic(Customizer.withDefaults());
+            .httpBasic(httpBasic -> httpBasic.disable());
 
         // allow H2 console frames
         http.headers(header -> header.frameOptions(frame -> frame.sameOrigin()));
