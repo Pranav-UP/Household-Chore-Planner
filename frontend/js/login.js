@@ -1,6 +1,9 @@
-const API_URL = window.location.origin === "null"
+const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
   ? "http://localhost:8080"
-  : "";
+  : "https://chore-planner-backend-npc3.onrender.com";
+
+// Optionally override from a global variable (set from hosting environment):
+// API_URL = window.API_BASE_URL || API_URL;
 
 document.addEventListener("DOMContentLoaded", () => {
   const emailInput = document.getElementById("email");
@@ -49,8 +52,15 @@ function login(event) {
   })
   .then(res => {
     if (!res.ok) {
-      return res.json().then(err => {
-        throw new Error(err.message || "Invalid credentials");
+      return res.text().then(text => {
+        let message = "Invalid credentials";
+        try {
+          const parsed = JSON.parse(text);
+          message = parsed.message || message;
+        } catch (_err) {
+          if (text) message = text;
+        }
+        throw new Error(message);
       });
     }
     return res.json();
