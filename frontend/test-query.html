@@ -44,7 +44,14 @@
     </div>
 
     <script>
-        const API_URL = 'http://localhost:8080';
+        // Align with app-wide API base resolution
+        const API_URL = (() => {
+            const override = window.API_BASE_URL || window.apiBaseUrl;
+            if (override && override.trim()) return override.replace(/\/$/, "");
+            const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+            if (isLocal) return "http://localhost:8080";
+            return "https://chore-planner-backend-npc3.onrender.com";
+        })();
         
         function sendQuery() {
             const queryData = {

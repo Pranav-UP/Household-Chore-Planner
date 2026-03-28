@@ -1,6 +1,10 @@
-const API_URL = window.location.origin === "null"
-  ? "http://localhost:8080"
-  : "";
+const API_URL = (() => {
+  const override = window.API_BASE_URL || window.apiBaseUrl;
+  if (override && override.trim()) return override.replace(/\/$/, "");
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (isLocal) return "http://localhost:8080";
+  return "https://chore-planner-backend-npc3.onrender.com";
+})();
 
 function register(event) {
   event.preventDefault();

@@ -3,7 +3,10 @@ const API_URL = (() => {
   if (override && override.trim()) return override.replace(/\/$/, "");
   const origin = window.location.origin;
   if (!origin || origin === "null") return "http://localhost:8080";
-  return origin.replace(/\/$/, "");
+  if (origin.includes("localhost") || origin.includes("127.0.0.1")) {
+    return origin.replace(/\/$/, "");
+  }
+  return "https://chore-planner-backend-npc3.onrender.com";
 })();
 
 let currentUserId = null;

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@org.springframework.stereotype.Controller
 @RequestMapping("/api/chat")
 @CrossOrigin(origins = "*")
 public class QueryController {

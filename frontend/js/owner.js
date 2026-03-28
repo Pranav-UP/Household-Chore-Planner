@@ -1,3 +1,11 @@
+const API_URL = (() => {
+  const override = window.API_BASE_URL || window.apiBaseUrl;
+  if (override && override.trim()) return override.replace(/\/$/, "");
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (isLocal) return "http://localhost:8080";
+  return "https://chore-planner-backend-npc3.onrender.com";
+})();
+
 function addChore() {
   const title = document.getElementById("title").value;
   const description = document.getElementById("description").value;
@@ -9,7 +17,7 @@ function addChore() {
     return;
   }
 
-  fetch("/api/chores", {
+  fetch(`${API_URL}/api/chores`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -29,7 +37,7 @@ function addChore() {
 }
 
 function loadChores() {
-  fetch("/api/chores")
+  fetch(`${API_URL}/api/chores`)
     .then(res => res.json())
     .then(data => {
       const table = document.getElementById("choreTable");
@@ -52,12 +60,12 @@ function loadChores() {
 }
 
 function deleteChore(id) {
-  fetch(`/api/chores/${id}`, { method: "DELETE" })
+  fetch(`${API_URL}/api/chores/${id}`, { method: "DELETE" })
     .then(() => loadChores());
 }
 
 function renderQueries(containerId) {
-  fetch("/api/queries")
+  fetch(`${API_URL}/api/queries`)
     .then(res => res.json())
     .then(data => {
       const list = document.getElementById(containerId);
@@ -99,7 +107,7 @@ function replyQuery(id) {
     return;
   }
 
-  fetch(`/api/queries/${id}/reply`, {
+  fetch(`${API_URL}/api/queries/${id}/reply`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

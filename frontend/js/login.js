@@ -1,9 +1,10 @@
-const API_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-  ? "http://localhost:8080"
-  : "https://chore-planner-backend-npc3.onrender.com";
-
-// Optionally override from a global variable (set from hosting environment):
-// API_URL = window.API_BASE_URL || API_URL;
+const API_URL = (() => {
+  const override = window.API_BASE_URL || window.apiBaseUrl;
+  if (override && override.trim()) return override.replace(/\/$/, "");
+  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  if (isLocal) return "http://localhost:8080";
+  return "https://chore-planner-backend-npc3.onrender.com";
+})();
 
 document.addEventListener("DOMContentLoaded", () => {
   const emailInput = document.getElementById("email");
